@@ -47,13 +47,16 @@ public class ProductService implements IProduct {
     private List<Integer> getSimilarIds(int productId) {
         try {
             Response<List<Integer>> response = existingApis.getSimilarIdsByProductId(productId).execute();
+
+            this.validateCodeStatusResponse(response.code());
+
             if (response.isSuccessful()) {
                 log.info("API RESPONSE: {}", gson.toJson(response.body()));
                 return response.body();
             }
-            throw new ApiResponseError(HttpStatus.CONFLICT.value(), "Problems with API, Try again");
+            return null;
         } catch (IOException e) {
-            throw new ApiResponseError(HttpStatus.CONFLICT.value(), "Problems with API, Try again");
+            throw new ApiResponseError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Problems with API, Try again");
         }
     }
 
@@ -61,13 +64,26 @@ public class ProductService implements IProduct {
         try {
             Response<ProductDetailApiResponse> productDetailResponse = existingApis.getProductDetailById(productId)
                     .execute();
+
+            this.validateCodeStatusResponse(productDetailResponse.code());
+
             if (productDetailResponse.isSuccessful()) {
                 log.info("API RESPONSE: {}", gson.toJson(productDetailResponse.body()));
                 return productDetailResponse.body();
             }
-            throw new ApiResponseError(HttpStatus.CONFLICT.value(), "Problems with API, Try again");
+            return null;
         } catch (IOException e) {
-            throw new ApiResponseError(HttpStatus.CONFLICT.value(), "Problems with API, Try again");
+            throw new ApiResponseError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Problems with API, Try again");
+        }
+    }
+
+    private void validateCodeStatusResponse(int codeStatus) {
+        HttpStatus httpStatus = HttpStatus.valueOf(codeStatus);
+        switch (httpStatus) {
+            case NOT_FOUND:
+                throw new ApiResponseError(HttpStatus.NOT_FOUND.value(), "Item didn't find");
+            case INTERNAL_SERVER_ERROR:
+                throw new ApiResponseError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Problem whit the api client");
         }
     }
 
