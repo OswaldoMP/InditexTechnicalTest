@@ -1,0 +1,11 @@
+
+
+webServices:
+  existingApi:
+    url: ${EXIST_API_URL:http://localhost:3001/}
+    connectTimeout: ${CONNECT_TIMEOUT:60000}
+    readTimeout: ${READ_TIMEOUT:60000}
+    writeTimeout: ${WRITE_TIMEOUT:60000}
+
+server:
+  port: 5000
